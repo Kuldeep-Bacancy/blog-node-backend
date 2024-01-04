@@ -7,13 +7,13 @@ const mailjet = Mailjet.apiConnect(
 
 const mailjetRequest = mailjet.post("send", { version: "v3.1" });
 
-const sendMail = async (from, to, name, subject, text) => {
+const sendMail = async (to, name, subject, text) => {
   try {
     const response = await mailjetRequest.request({
       Messages: [
         {
           From: {
-            Email: from,
+            Email: "kuldeep.chotaliya@bacancy.com",
             Name: "Blog App",
           },
           To: [

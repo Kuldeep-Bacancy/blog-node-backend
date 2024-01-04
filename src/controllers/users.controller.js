@@ -91,7 +91,7 @@ const loginUser = async (req, res) => {
       secure: true,
     };
 
-    const response = await sendMail("kuldeep.chotaliya@bacancy.com", "kuldeepchotaliya17@gmail.com", loggedInUser?.fullName, "Welcome to Blog app!", "Hello There! Welcome to blog app!")
+    const response = await sendMail("kuldeepchotaliya17@gmail.com", loggedInUser?.fullName, "Welcome to Blog app!", "Hello There! Welcome to blog app!")
 
     console.log("response", response.response);
 
