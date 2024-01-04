@@ -18,6 +18,6 @@ const postSchema = mongoose.Schema({
       type: String
     }
   ]
-})
+}, { timestamps: true })
 
 export const Post = mongoose.model("Post", postSchema)
