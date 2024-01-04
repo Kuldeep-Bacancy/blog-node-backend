@@ -1,6 +1,7 @@
 import { User } from "../models/user.models.js"
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js"
+import sendMail from "../utils/mailjet.js";
 
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -89,6 +90,10 @@ const loginUser = async (req, res) => {
       httpOnly: true,
       secure: true,
     };
+
+    const response = await sendMail("kuldeep.chotaliya@bacancy.com", "kuldeepchotaliya17@gmail.com", loggedInUser?.fullName, "Welcome to Blog app!", "Hello There! Welcome to blog app!")
+
+    console.log("response", response.response);
 
     return res
            .status(200)
