@@ -157,4 +157,32 @@ const changePassword = async (req, res) => {
     )
   }
 }
-export { registerUser, loginUser, logoutUser, changePassword }
+
+const updateUserInfo = async (req, res) => {
+  const { fullName, email } = req.body
+
+  if(!fullName || !email){
+    return res.status(400).json(
+      new ApiResponse(400, "FullName or Email required")
+    )
+  }
+
+  const updatedUser = await User.updateOne(
+    { _id: req.user?._id },
+    { $set: { fullName: fullName, email: email} }
+  )
+
+  if (!updatedUser) {
+    return res.status(500).json(
+      new ApiResponse(500, "Can't update user right now!")
+    )
+  }
+
+  const user = await User.findOne({ _id: req.user?._id }).select('-password -refreshToken')
+
+  return res.status(200).json(
+    new ApiResponse(200, "User updated successfully!", user)
+  )
+  
+}
+export { registerUser, loginUser, logoutUser, changePassword, updateUserInfo }
