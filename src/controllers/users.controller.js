@@ -104,4 +104,32 @@ const loginUser = async (req, res) => {
   }
 }
 
-export { registerUser, loginUser }
+const logoutUser = async (req, res) => {
+  try {
+    const user = await User.updateOne(
+      { _id: req.user?._id },
+      {
+        $set: {
+          refreshToken: ""
+        }
+      },
+      { new: true }
+    )
+
+    console.log("user", user);
+
+    return res
+      .status(200)
+      .clearCookie('accessToken')
+      .clearCookie('refreshToken')
+      .json(
+        new ApiResponse(200, "User logged out successfully")
+      )
+  } catch (error) {
+    res.status(500).json(
+      new ApiResponse(500, error.message)
+    )
+  }
+  
+}
+export { registerUser, loginUser, logoutUser }
