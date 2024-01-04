@@ -116,8 +116,6 @@ const logoutUser = async (req, res) => {
       { new: true }
     )
 
-    console.log("user", user);
-
     return res
       .status(200)
       .clearCookie('accessToken')
@@ -132,4 +130,31 @@ const logoutUser = async (req, res) => {
   }
   
 }
-export { registerUser, loginUser, logoutUser }
+
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+    const user = await User.findOne({ _id: req.user?._id })
+
+    const passwordCheck = await user.isPasswordCorrect(currentPassword)
+
+    if(!passwordCheck){
+      return res.status(400).json(
+        new ApiResponse(400, 'Current password is wrong!')
+      )
+    }
+
+    user.password = newPassword
+    await user.save({ validateBeforeSave: false })
+
+    return res.status(200).json(
+      new ApiResponse(200, 'Password Updated Successfully!')
+    )
+
+  } catch (error) {
+    res.status(500).json(
+      new ApiResponse(500, error.message)
+    )
+  }
+}
+export { registerUser, loginUser, logoutUser, changePassword }
