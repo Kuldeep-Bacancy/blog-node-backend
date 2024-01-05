@@ -1,6 +1,7 @@
 import ApiResponse from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Post } from "../models/post.models.js"
+import mongoose from "mongoose";
 
 const createPost = async (req, res) => {
   try {
@@ -74,4 +75,55 @@ const getAllPosts = async (req, res) => {
   )
 }
 
-export { createPost, getAllPosts }
+const getPost = async(req, res) => {
+  try {
+    const postId = req.params.postId
+
+    if(!postId){
+      return res.status(400).json(
+        new ApiResponse(400, "Please Provide Post ID")
+      )
+    }
+
+    const post = await Post.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(postId) }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      {
+        $project: {
+          title: 1,
+          content: 1,
+          images: 1,
+          user: { $arrayElemAt: ['$userDetails', 0] }
+        }
+      }
+    ])
+    
+    console.log(post);
+
+    if(!post){
+      return res.status(400).json(
+        new ApiResponse(400, "Post not exist with this ID")
+      )
+    }
+
+    return res.status(200).json(
+      new ApiResponse(200, "Post fetched successfully!", post)
+    )
+  } catch (error) {
+    return res.status(500).json(
+      new ApiResponse(500, error.message)
+    )
+  }
+}
+
+export { createPost, getAllPosts, getPost }
