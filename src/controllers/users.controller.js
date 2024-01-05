@@ -1,8 +1,8 @@
+import { Post } from "../models/post.models.js";
 import { User } from "../models/user.models.js"
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js"
 import sendMail from "../utils/mailjet.js";
-
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -190,4 +190,13 @@ const updateUserInfo = async (req, res) => {
   )
   
 }
-export { registerUser, loginUser, logoutUser, changePassword, updateUserInfo }
+
+const getCurrentUserPosts = async (req, res) => {
+  const posts = await Post.find({ user: req.user?._id })
+
+  return res.status(200).json(
+    new ApiResponse(200, "Posts fetched successfully!", posts)
+  )
+}
+
+export { registerUser, loginUser, logoutUser, changePassword, updateUserInfo, getCurrentUserPosts }

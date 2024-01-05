@@ -126,4 +126,47 @@ const getPost = async(req, res) => {
   }
 }
 
-export { createPost, getAllPosts, getPost }
+const deletePost = async(req, res) => {
+  try {
+    const postId = req.params.postId
+
+    if (!postId) {
+      return res.status(400).json(
+        new ApiResponse(400, "Please Provide Post ID")
+      )
+    }
+
+    const post = await Post.findById(postId)
+    
+    if(!post){
+      return res.status(404).json(
+        new ApiResponse(404, "Post not exist with this ID")
+      )
+    }
+    
+    if (!post.user.equals(req.user?._id)) {
+      return res.status(422).json(
+        new ApiResponse(422, "You are not authorized to delete this post!")
+      )
+    }
+
+    const deletedPost = await post.deleteOne();
+
+    if (!deletedPost) {
+      return res.status(500).json(
+        new ApiResponse(500, "Something went wrong while deleting the Post!")
+      )
+    }
+
+    return res.status(200).json(
+      new ApiResponse(200, "Post Deleted Successfully!")
+    )
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(
+      new ApiResponse(500, error.message)
+    )
+  }
+}
+
+export { createPost, getAllPosts, getPost, deletePost }
