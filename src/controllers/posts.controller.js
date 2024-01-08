@@ -107,8 +107,6 @@ const getPost = async(req, res) => {
         }
       }
     ])
-    
-    console.log(post);
 
     if(!post){
       return res.status(400).json(
@@ -162,11 +160,136 @@ const deletePost = async(req, res) => {
       new ApiResponse(200, "Post Deleted Successfully!")
     )
   } catch (error) {
-    console.log(error);
     return res.status(500).json(
       new ApiResponse(500, error.message)
     )
   }
 }
 
-export { createPost, getAllPosts, getPost, deletePost }
+const likePost = async(req, res) => {
+ try {
+   const postId = req.params.postId
+
+   if (!postId) {
+     return res.status(400).json(
+       new ApiResponse(400, "Please Provide Post ID")
+     )
+   }
+
+   // check already liked post
+   const alreadyLikedPost = await Post.findOne({ "likes.user": new mongoose.Types.ObjectId(req.user?._id) })
+
+   if (alreadyLikedPost){
+     return res.status(422).json(
+       new ApiResponse(422, "You have already liked this post!")
+     )
+   }
+
+   const likedPost = await Post.findOneAndUpdate(
+    {
+      _id: postId
+    },
+    {
+      $push: {
+        likes: { user: req.user?._id }
+      }
+    },
+    {
+      new: true
+    }
+   )
+
+   if (!likedPost){
+    return res.status(500).json(
+      new ApiResponse(500, "Something went wrong while liking post!")
+    )
+   }
+
+   await Post.updateOne(
+     { "dislikes.user": new mongoose.Types.ObjectId(req.user?._id) },
+     {
+      $pull: {
+         dislikes: { user: new mongoose.Types.ObjectId(req.user?._id) }
+      }
+     }
+   )
+
+   return res.status(200).json(
+     new ApiResponse(200, "Post Liked Successfully!", likedPost)
+   )
+
+
+ } catch (error) {
+   return res.status(500).json(
+     new ApiResponse(500, error.message)
+   )
+ }
+}
+
+const dislikePost = async(req, res) => {
+  try {
+    const postId = req.params.postId
+
+    if (!postId) {
+      return res.status(400).json(
+        new ApiResponse(400, "Please Provide Post ID")
+      )
+    }
+
+    const post = await Post.findById(postId)
+
+    if (!post) {
+      return res.status(404).json(
+        new ApiResponse(404, "Post not exist with this ID")
+      )
+    }
+    // check already disliked post
+    const alreadyDislikedPost = await Post.findOne({ "dislikes.user": new mongoose.Types.ObjectId(req.user?._id) })
+
+    if (alreadyDislikedPost) {
+      return res.status(422).json(
+        new ApiResponse(422, "You have already disliked this post!")
+      )
+    }
+
+    const dislikedPost = await Post.findOneAndUpdate(
+      {
+        _id: postId
+      },
+      {
+        $push: {
+          dislikes: { user: req.user?._id }
+        }
+      },
+      {
+        new: true
+      }
+    )
+
+    if (!dislikedPost) {
+      return res.status(500).json(
+        new ApiResponse(500, "Something went wrong while disliking post!")
+      )
+    }
+
+    await Post.updateOne(
+      { "likes.user": new mongoose.Types.ObjectId(req.user?._id) },
+      {
+        $pull: {
+          likes: { user: new mongoose.Types.ObjectId(req.user?._id) }
+        }
+      }
+    )
+
+    return res.status(200).json(
+      new ApiResponse(200, "Post disliked Successfully!", dislikedPost)
+    )
+
+  } catch (error) {
+    return res.status(500).json(
+      new ApiResponse(500, error.message)
+    )
+  }
+}
+
+export { createPost, getAllPosts, getPost, deletePost, likePost, dislikePost }
