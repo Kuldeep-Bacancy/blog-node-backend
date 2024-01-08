@@ -17,8 +17,6 @@ const verfiyJWT = async (req, res, next) => {
       "-password -refreshToken"
     );
 
-    console.log("user",user);
-
     if (!user) {
       return res.status(401).json(
         new ApiResponse(401, "Unauthorized request!")

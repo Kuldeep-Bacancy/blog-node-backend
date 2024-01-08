@@ -1,7 +1,7 @@
 import cookieParser from "cookie-parser";
 import express from "express";
 import cors from "cors";
-import morgan from "morgan";
+import logger from "./utils/Logger.js";
 
 const app = express();
 
@@ -15,15 +15,24 @@ app.use(express.json({ limit: '20kb' })) // To define size of json which can exp
 app.use(express.urlencoded({ extended: true, limit: "16kb" })) // To deal with query parameters
 app.use(express.static("public")) // To handle static assets
 app.use(cookieParser()) // To set and get cookies from client
-app.use(
-  morgan(":method :url :status :res[content-length] - :response-time ms") // request server logs
-)
+
+// Log the incoming request details
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.originalUrl}`, {
+    headers: req.headers,
+    body: req.body,
+    params: req.params,
+    query: req.query,
+  });
+  next();
+});
 
 
 // routes
 import userRouter from "./routes/users.routes.js"
 import postRouter from "./routes/posts.routes.js"
 import commentRouter from "./routes/comments.routes.js"
+
 
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/posts', postRouter)
