@@ -117,8 +117,15 @@ const getAllPosts = async (req, res) => {
     }
   ])
   
+  const options = {
+    page: req.query?.page || 1,
+    limit: req.query?.limit || 2,
+  }
+
+  const paginatedResult = await Post.aggregatePaginate(posts, options)
+
   return res.status(200).json(
-    new ApiResponse(200, "Posts fetched Successfully!", posts)
+    new ApiResponse(200, "Posts fetched Successfully!", paginatedResult)
   )
 }
 

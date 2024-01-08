@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const likeAndDislikeSchema = new mongoose.Schema({
   user: {
@@ -30,5 +30,7 @@ const postSchema = mongoose.Schema({
   likes: [likeAndDislikeSchema],
   dislikes: [likeAndDislikeSchema]
 }, { timestamps: true })
+
+postSchema.plugin(mongooseAggregatePaginate)
 
 export const Post = mongoose.model("Post", postSchema)
