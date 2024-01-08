@@ -192,7 +192,60 @@ const updateUserInfo = async (req, res) => {
 }
 
 const getCurrentUserPosts = async (req, res) => {
-  const posts = await Post.find({ user: req.user?._id })
+
+  const posts = await Post.aggregate([
+    {
+      $match: { user: req.user?._id }
+    },
+    {
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'comments',
+        pipeline:[
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'commentedBy',
+              foreignField: '_id',
+              as: 'commentedBy',
+              pipeline:[
+                {
+                  $project: {
+                    password: 0,
+                    refreshToken: 0
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields: {
+              commentedBy: {
+                $first: "$commentedBy"
+              }
+            }
+          },
+          {
+            $project: {
+              postId: 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      $project: {
+        title: 1,
+        content: 1,
+        images: 1,
+        'likes.user': 1,
+        'likes._id': 1,
+        comments:1 
+      }
+    }
+  ])
 
   return res.status(200).json(
     new ApiResponse(200, "Posts fetched successfully!", posts)

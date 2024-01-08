@@ -57,7 +57,53 @@ const getAllPosts = async (req, res) => {
         from: 'users',
         localField: 'user',
         foreignField: '_id',
-        as: 'userDetails'
+        as: 'userDetails',
+        pipeline: [
+          {
+            $project: {
+              password: 0,
+              refreshToken: 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'comments',
+        pipeline: [
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'commentedBy',
+              foreignField: '_id',
+              as: 'commentedBy',
+              pipeline: [
+                {
+                  $project: {
+                    password: 0,
+                    refreshToken: 0
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields: {
+              commentedBy: {
+                $first: "$commentedBy"
+              }
+            }
+          },
+          {
+            $project: {
+              postId: 0
+            }
+          }
+        ]
       }
     },
     {
@@ -65,7 +111,8 @@ const getAllPosts = async (req, res) => {
         title: 1,
         content: 1,
         images: 1,
-        user: { $arrayElemAt: ['$userDetails', 0] }
+        user: { $arrayElemAt: ['$userDetails', 0] },
+        comments: 1
       }
     }
   ])
