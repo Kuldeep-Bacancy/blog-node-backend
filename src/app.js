@@ -1,9 +1,12 @@
 import cookieParser from "cookie-parser";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import logger from "./utils/Logger.js";
 
 const app = express();
+
+app.use(helmet()) // For security
 
 // To handle CORS related issues
 app.use(cors({
