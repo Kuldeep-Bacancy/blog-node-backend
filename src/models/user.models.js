@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import stripeInstance from "../utils/Stripe.js";
 
 const userSchema = mongoose.Schema({
   email:{
@@ -20,6 +21,9 @@ const userSchema = mongoose.Schema({
     type: String,
     requied: [true, "Full Name is required!"]
   },
+  stripeCustomerID: {
+    type: String
+  },
   refreshToken:{
     type: String
   }
@@ -30,6 +34,21 @@ userSchema.pre("save", async function (next) {
 
   this.password = await bcrypt.hash(this.password, 10)
   next()
+})
+
+userSchema.post("save", async function (doc) {
+  try {
+    if (doc.stripeCustomerID) return;
+
+    const customer = await stripeInstance.customers.create({
+      email: doc.email,
+
+    })
+
+    await doc.updateOne({ $set: { stripeCustomerID: customer.id, name: doc.fullName } });
+  } catch (error) {
+    console.error("Error creating Stripe customer:", error);
+  }
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {
