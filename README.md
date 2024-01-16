@@ -35,7 +35,7 @@ If you need to update `npm`, you can make it using `npm`! Cool right? After runn
 
     npm install npm -g
 
-## Install
+## Set up the project
 
     git clone https://github.com/Kuldeep-Bacancy/blog-node-backend
     cd blog-node-backend
