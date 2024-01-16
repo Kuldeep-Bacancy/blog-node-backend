@@ -6,6 +6,8 @@ import logger from "./utils/Logger.js";
 
 const app = express();
 
+app.set('view engine', 'ejs');
+
 app.use(helmet()) // For security
 
 // To handle CORS related issues

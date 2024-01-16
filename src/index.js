@@ -14,7 +14,7 @@ connectDB()
   })
 
   app.get('/', (req, res) => {
-    res.send('Welcome to Blog app!')
+    res.render('index', { currentYear: new Date().getFullYear() });
   })
 }
 )
