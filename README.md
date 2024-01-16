@@ -73,6 +73,10 @@ If you need to update `npm`, you can make it using `npm`! Cool right? After runn
 
     STRIPE_SECRET_KEY="YOUR STRIPE SECRET KEY"
 
+## Postman collection
+
+  <https://documenter.getpostman.com/view/29238918/2s9YsQ7pKZ>
+
 ## Running the project
 
     npm start
